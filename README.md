@@ -162,7 +162,11 @@ If you want to completely remove the content of a cart, you can call the destroy
 ```php
 Cart::destroy();
 ```
+Since version 3, you may pass cart identifier in argument to also delete cart in database.
 
+```php
+Cart::destroy($identifier);
+```
 ### Cart::total()
 
 The `total()` method can be used to get the calculated total of all items in the cart, given there price and quantity.
@@ -361,6 +365,10 @@ If you want to retrieve the cart from the database and restore it, all you have 
     
     // To restore a cart instance named 'wishlist'
     Cart::instance('wishlist')->restore('username');
+    
+Since V3, cart will stay in database after beeing restored. You can force deleting using the second argument $delete
+    
+    Cart::restore('username', true);
 
 ## Exceptions
 
