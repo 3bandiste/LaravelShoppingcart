@@ -195,9 +195,13 @@ class Cart
      *
      * @return void
      */
-    public function destroy()
+    public function destroy($identifier = null)
     {
         $this->session->remove($this->instance);
+        if ($identifier) {
+            $this->getConnection()->table($this->getTableName())
+                ->where('identifier', $identifier)->delete();
+        }
     }
 
     /**
@@ -350,13 +354,10 @@ class Cart
     {
         $content = $this->getContent();
 
-        if ($this->storedCartWithIdentifierExists($identifier)) {
-            throw new CartAlreadyStoredException("A cart with identifier {$identifier} was already stored.");
-        }
-
-        $this->getConnection()->table($this->getTableName())->insert([
+        $this->getConnection()->table($this->getTableName())->updateOrInsert([
             'identifier' => $identifier,
             'instance' => $this->currentInstance(),
+            ],[
             'content' => serialize($content),
             'created_at' => date('Y-m-d H:i:s')
         ]);
@@ -370,7 +371,7 @@ class Cart
      * @param mixed $identifier
      * @return void
      */
-    public function restore($identifier)
+    public function restore($identifier, bool $delete = false)
     {
         if( ! $this->storedCartWithIdentifierExists($identifier)) {
             return;
@@ -396,9 +397,10 @@ class Cart
         $this->session->put($this->instance, $content);
 
         $this->instance($currentInstance);
-
-        $this->getConnection()->table($this->getTableName())
-            ->where('identifier', $identifier)->delete();
+        if ($delete) {
+            $this->getConnection()->table($this->getTableName())
+                ->where('identifier', $identifier)->delete();
+        }
     }
 
     /**
